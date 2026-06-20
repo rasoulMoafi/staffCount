@@ -1,75 +1,27 @@
-# Nuxt Minimal Starter
+# شمارش اجناس
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+اپلیکیشن موبایلی برای ثبت نام و تعداد اجناس با ذخیره‌سازی در localStorage.
 
-## Setup
+## Live demo
 
-Make sure to install dependencies:
+https://rasoulmoafi.github.io/staffCount/
+
+## Development
 
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+## GitHub Pages
 
-Build the application for production:
+این پروژه با GitHub Actions به‌صورت خودکار روی GitHub Pages منتشر می‌شود.
 
-```bash
-# npm
-npm run build
+- هر push به شاخه `main` باعث build و deploy می‌شود
+- خروجی static با `npm run generate` ساخته می‌شود
+- آدرس پایه production: `/staffCount/`
 
-# pnpm
-pnpm build
+برای فعال‌سازی اولیه در GitHub:
 
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+1. به **Settings → Pages** بروید
+2. در **Build and deployment** گزینه **Source** را روی **GitHub Actions** بگذارید

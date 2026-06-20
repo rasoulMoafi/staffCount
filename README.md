@@ -15,13 +15,17 @@ npm run dev
 
 ## GitHub Pages
 
-این پروژه با GitHub Actions به‌صورت خودکار روی GitHub Pages منتشر می‌شود.
+سایت روی آدرس زیر منتشر می‌شود:
 
-- هر push به شاخه `main` باعث build و deploy می‌شود
-- خروجی static با `npm run generate` ساخته می‌شود
-- آدرس پایه production: `/staffCount/`
+https://rasoulmoafi.github.io/staffCount/
 
-برای فعال‌سازی اولیه در GitHub:
+هر push به شاخه `main` باعث build و deploy خودکار می‌شود.
+
+تنظیمات GitHub Pages (یک‌بار):
 
 1. به **Settings → Pages** بروید
-2. در **Build and deployment** گزینه **Source** را روی **GitHub Actions** بگذارید
+2. **Build and deployment → Source** را روی **Deploy from a branch** بگذارید
+3. **Branch** را `gh-pages` و پوشه را `/ (root)` انتخاب کنید
+4. **Save** را بزنید
+
+بعد از اولین اجرای workflow در تب **Actions**، سایت روی آدرس بالا در دسترس است.

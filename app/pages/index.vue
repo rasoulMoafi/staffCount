@@ -11,10 +11,11 @@ useHead({
   },
 })
 
-const { staff, isReady, addStaff, updateStaff, removeStaff, replaceStaff, totalCount } = useStaffStorage()
+const { staff, isReady, addStaff, updateStaff, removeStaff, replaceStaff, totalWarehouse, totalCar } = useStaffStorage()
 
 const name = ref('')
-const count = ref<number | null>(null)
+const warehouse = ref<number | null>(null)
+const car = ref<number | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const pendingImportItems = ref<StaffFileItem[]>([])
 
@@ -28,7 +29,8 @@ const exportFileName = ref('')
 const editingEntry = ref<StaffEntry | null>(null)
 const deletingEntry = ref<StaffEntry | null>(null)
 const editName = ref('')
-const editCount = ref<number | null>(null)
+const editWarehouse = ref<number | null>(null)
+const editCar = ref<number | null>(null)
 
 function parseCount(value: number | null) {
   const parsed = Number(value)
@@ -36,11 +38,16 @@ function parseCount(value: number | null) {
 }
 
 function handleAdd() {
-  const success = addStaff(name.value, parseCount(count.value))
+  const success = addStaff(
+    name.value,
+    parseCount(warehouse.value),
+    parseCount(car.value),
+  )
 
   if (success) {
     name.value = ''
-    count.value = null
+    warehouse.value = null
+    car.value = null
   }
 }
 
@@ -129,7 +136,8 @@ function closeImportError() {
 function openEdit(entry: StaffEntry) {
   editingEntry.value = entry
   editName.value = entry.name
-  editCount.value = entry.count
+  editWarehouse.value = entry.warehouse
+  editCar.value = entry.car
   editDialogRef.value?.showModal()
 }
 
@@ -137,7 +145,8 @@ function closeEdit() {
   editDialogRef.value?.close()
   editingEntry.value = null
   editName.value = ''
-  editCount.value = null
+  editWarehouse.value = null
+  editCar.value = null
 }
 
 function handleEditSave() {
@@ -148,7 +157,8 @@ function handleEditSave() {
   const success = updateStaff(
     editingEntry.value.id,
     editName.value,
-    parseCount(editCount.value),
+    parseCount(editWarehouse.value),
+    parseCount(editCar.value),
   )
 
   if (success) {
@@ -181,7 +191,7 @@ function confirmDelete() {
         شمارش اجناس
       </h1>
       <p class="mt-2 text-sm leading-7 text-base-content/70">
-        نام اجناس و تعداد آن‌ها را ثبت کنید. اطلاعات به‌صورت خودکار در مرورگر شما ذخیره می‌شود.
+        نام اجناس و تعداد انبار و ماشین را ثبت کنید. اطلاعات به‌صورت خودکار در مرورگر شما ذخیره می‌شود.
       </p>
     </header>
 
@@ -204,20 +214,37 @@ function confirmDelete() {
           >
         </label>
 
-        <label class="form-control w-full">
-          <span class="label pb-1">
-            <span class="label-text font-medium">تعداد</span>
-          </span>
-          <input
-            v-model.number="count"
-            type="number"
-            min="0"
-            inputmode="numeric"
-            class="input input-bordered w-full"
-            placeholder="۰"
-            @keyup.enter="handleAdd"
-          >
-        </label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="form-control w-full">
+            <span class="label pb-1">
+              <span class="label-text font-medium">انبار</span>
+            </span>
+            <input
+              v-model.number="warehouse"
+              type="number"
+              min="0"
+              inputmode="numeric"
+              class="input input-bordered w-full"
+              placeholder="۰"
+              @keyup.enter="handleAdd"
+            >
+          </label>
+
+          <label class="form-control w-full">
+            <span class="label pb-1">
+              <span class="label-text font-medium">ماشین</span>
+            </span>
+            <input
+              v-model.number="car"
+              type="number"
+              min="0"
+              inputmode="numeric"
+              class="input input-bordered w-full"
+              placeholder="۰"
+              @keyup.enter="handleAdd"
+            >
+          </label>
+        </div>
 
         <button
           type="button"
@@ -236,9 +263,14 @@ function confirmDelete() {
           <h2 class="text-lg font-semibold">
             لیست اجناس
           </h2>
-          <span class="badge badge-primary badge-lg">
-            {{ totalCount }}
-          </span>
+          <div class="flex gap-2">
+            <span class="badge badge-neutral badge-lg">
+              انبار: {{ totalWarehouse }}
+            </span>
+            <span class="badge badge-neutral badge-lg">
+              ماشین: {{ totalCar }}
+            </span>
+          </div>
         </div>
 
         <div v-if="!isReady" class="py-8 text-center text-sm text-base-content/60">
@@ -253,12 +285,19 @@ function confirmDelete() {
         </div>
 
         <ul v-else class="flex flex-col gap-3">
+          <li class="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2 px-1 text-xs font-medium text-base-content/60">
+            <span class="text-right">نام</span>
+            <span class="w-8" />
+            <span class="w-14 text-center">انبار</span>
+            <span class="w-14 text-center">ماشین</span>
+          </li>
+
           <li
             v-for="entry in staff"
             :key="entry.id"
-            class="flex items-center gap-2 rounded-box border border-base-300 bg-base-200/50 p-3"
+            class="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2 rounded-box border border-base-300 bg-base-200/50 p-3"
           >
-            <div class="min-w-0 flex-1 text-right">
+            <div class="min-w-0 text-right">
               <p class="truncate font-medium">
                 {{ entry.name }}
               </p>
@@ -283,8 +322,12 @@ function confirmDelete() {
               </button>
             </div>
 
-            <div class="badge badge-neutral badge-lg min-w-12 shrink-0 justify-center">
-              {{ entry.count }}
+            <div class="badge badge-neutral badge-lg w-14 shrink-0 justify-center">
+              {{ entry.warehouse }}
+            </div>
+
+            <div class="badge badge-neutral badge-lg w-14 shrink-0 justify-center">
+              {{ entry.car }}
             </div>
           </li>
         </ul>
@@ -296,10 +339,16 @@ function confirmDelete() {
 
         <div
           v-if="isReady && staff.length > 0"
-          class="flex items-center justify-between rounded-box bg-primary/10 px-4 py-3"
+          class="grid grid-cols-2 gap-3"
         >
-          <span class="font-medium">جمع کل</span>
-          <span class="text-lg font-bold text-primary">{{ totalCount }}</span>
+          <div class="flex items-center justify-between rounded-box bg-primary/10 px-4 py-3">
+            <span class="font-medium">جمع انبار</span>
+            <span class="text-lg font-bold text-primary">{{ totalWarehouse }}</span>
+          </div>
+          <div class="flex items-center justify-between rounded-box bg-primary/10 px-4 py-3">
+            <span class="font-medium">جمع ماشین</span>
+            <span class="text-lg font-bold text-primary">{{ totalCar }}</span>
+          </div>
         </div>
 
         <div v-if="isReady" class="flex gap-2">
@@ -389,25 +438,42 @@ function confirmDelete() {
               v-model="editName"
               type="text"
               class="input input-bordered w-full"
-              placeholder="مثلاً علی رضایی"
+              placeholder="مثلاً وینستون"
               @keyup.enter="handleEditSave"
             >
           </label>
 
-          <label class="form-control w-full">
-            <span class="label pb-1">
-              <span class="label-text font-medium">تعداد</span>
-            </span>
-            <input
-              v-model.number="editCount"
-              type="number"
-              min="0"
-              inputmode="numeric"
-              class="input input-bordered w-full"
-              placeholder="۰"
-              @keyup.enter="handleEditSave"
-            >
-          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="form-control w-full">
+              <span class="label pb-1">
+                <span class="label-text font-medium">انبار</span>
+              </span>
+              <input
+                v-model.number="editWarehouse"
+                type="number"
+                min="0"
+                inputmode="numeric"
+                class="input input-bordered w-full"
+                placeholder="۰"
+                @keyup.enter="handleEditSave"
+              >
+            </label>
+
+            <label class="form-control w-full">
+              <span class="label pb-1">
+                <span class="label-text font-medium">ماشین</span>
+              </span>
+              <input
+                v-model.number="editCar"
+                type="number"
+                min="0"
+                inputmode="numeric"
+                class="input input-bordered w-full"
+                placeholder="۰"
+                @keyup.enter="handleEditSave"
+              >
+            </label>
+          </div>
         </div>
 
         <div class="modal-action">
@@ -488,8 +554,10 @@ function confirmDelete() {
         <p class="py-4 text-sm leading-7 text-base-content/80">
           آیا از حذف
           <span class="font-semibold">{{ deletingEntry?.name }}</span>
-          با تعداد
-          <span class="font-semibold">{{ deletingEntry?.count }}</span>
+          با انبار
+          <span class="font-semibold">{{ deletingEntry?.warehouse }}</span>
+          و ماشین
+          <span class="font-semibold">{{ deletingEntry?.car }}</span>
           مطمئن هستید؟
         </p>
 

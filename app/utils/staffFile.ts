@@ -2,15 +2,24 @@ import type { StaffEntry } from '~/composables/useStaffStorage'
 
 export interface StaffFileItem {
   name: string
-  count: number
+  warehouse: number
+  car: number
+}
+
+interface RawFileItem {
+  name?: string
+  count?: number
+  warehouse?: number
+  car?: number
 }
 
 export function serializeStaffToText(staff: StaffEntry[]) {
   const payload = {
-    version: 1,
+    version: 2,
     items: staff.map(entry => ({
       name: entry.name,
-      count: entry.count,
+      warehouse: entry.warehouse,
+      car: entry.car,
     })),
   }
 
@@ -26,8 +35,8 @@ export function parseStaffFromText(text: string): StaffFileItem[] {
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
     try {
       const parsed = JSON.parse(trimmed) as
-        | { items?: StaffFileItem[], staff?: StaffFileItem[] }
-        | StaffFileItem[]
+        | { items?: RawFileItem[], staff?: RawFileItem[] }
+        | RawFileItem[]
 
       if (Array.isArray(parsed)) {
         return normalizeItems(parsed)
@@ -52,23 +61,31 @@ export function parseStaffFromText(text: string): StaffFileItem[] {
     .filter(line => line && !line.startsWith('#'))
     .map((line) => {
       const separator = line.includes('\t') ? '\t' : ','
-      const [name, countValue] = line.split(separator)
-      const parsedCount = Number(countValue)
+      const parts = line.split(separator)
+      const name = parts[0]?.trim() ?? ''
+      const warehouse = Number(parts[1])
+      const car = Number(parts[2])
 
       return {
-        name: name?.trim() ?? '',
-        count: Number.isFinite(parsedCount) ? parsedCount : 0,
+        name,
+        warehouse: Number.isFinite(warehouse) ? warehouse : 0,
+        car: Number.isFinite(car) ? car : 0,
       }
     })
     .filter(item => item.name)
 }
 
-function normalizeItems(items: StaffFileItem[]) {
+function normalizeItems(items: RawFileItem[]) {
   return items
-    .map(item => ({
-      name: String(item.name ?? '').trim(),
-      count: Math.max(0, Number(item.count) || 0),
-    }))
+    .map((item) => {
+      const hasNewFields = item.warehouse !== undefined || item.car !== undefined
+
+      return {
+        name: String(item.name ?? '').trim(),
+        warehouse: Math.max(0, Number(hasNewFields ? item.warehouse : item.count) || 0),
+        car: Math.max(0, Number(item.car) || 0),
+      }
+    })
     .filter(item => item.name)
 }
 
